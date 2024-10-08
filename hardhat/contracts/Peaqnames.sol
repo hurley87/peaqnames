@@ -18,7 +18,7 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
     mapping(uint256 => Name) public names; // Maps tokenId to name details
     mapping(string => uint256) public nameToTokenId; // Maps name to tokenId
     uint256 public nextTokenId;
-    uint256 public flatFeePerMonth = 0.01 ether; // Fixed flat fee per month
+    uint256 public flatFeePerMonth = 0.001 ether; // Fixed flat fee per month
     mapping(address => bool) public allowlist;
 
     // Events
@@ -109,6 +109,18 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
             }
         }
         return true;
+    }
+
+    function isNameAvailable(string memory _name) public view returns (bool) {
+        uint256 tokenId = nameToTokenId[_name];
+        
+        // If the tokenId is 0, the name has never been registered
+        if (tokenId == 0) {
+            return true;
+        }
+        
+        // If the tokenId exists, check if it has expired
+        return isNameAvailable(tokenId);
     }
 
     // Allow the contract owner to withdraw payments
