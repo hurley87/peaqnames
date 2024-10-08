@@ -63,7 +63,7 @@ export const gaslessFundAndUploadSingleFile = async (
   const network = 'devnet';
   const token = 'base-eth';
   const wallet = { name: 'ethersv5', provider: provider };
-  //@ts-expect-error
+
   const irys = new WebIrys({ network, token, wallet });
 
   await irys.ready();

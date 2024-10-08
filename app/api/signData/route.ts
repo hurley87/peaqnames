@@ -27,6 +27,7 @@ async function readFromStream(stream: ReadableStream): Promise<string> {
 
 export async function POST(req: Request) {
   //@ts-expect-error
+  // TODO: fix this
   const rawData = await readFromStream(req.body);
   const body = JSON.parse(rawData);
 
