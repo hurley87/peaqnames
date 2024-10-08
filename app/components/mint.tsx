@@ -35,15 +35,17 @@ export default function Mint() {
 
   return (
     <div className="flex flex-col gap-4 w-[600px] mx-auto">
-      <Input
-        type="text"
-        placeholder="Enter name"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-      />
-      <Button onClick={handleUpload}>
-        {isUploading ? 'Uploading...' : 'Upload'}
-      </Button>
+      <div className="flex gap-4">
+        <Input
+          type="text"
+          placeholder="Enter name"
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+        />
+        <Button onClick={handleUpload}>
+          {isUploading ? 'Uploading...' : 'Upload'}
+        </Button>
+      </div>
       {tokenURI && (
         <div
           className="cursor-pointer text-center text-[#6565FF] text-sm"
