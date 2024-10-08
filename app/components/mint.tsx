@@ -46,7 +46,7 @@ export default function Mint() {
       </Button>
       {tokenURI && (
         <div
-          className="cursor-pointer text-center text-[#6565FF]"
+          className="cursor-pointer text-center text-[#6565FF] text-sm"
           onClick={copyToClipboard}
         >
           {tokenURI}
