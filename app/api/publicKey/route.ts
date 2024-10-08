@@ -11,6 +11,6 @@ async function serverInit(): Promise<Buffer> {
   return signer.publicKey;
 }
 
-export async function GET(req: Request) {
+export async function GET() {
   return NextResponse.json({ pubKey: (await serverInit()).toString('hex') });
 }
