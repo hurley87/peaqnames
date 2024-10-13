@@ -28,7 +28,7 @@ export const Header = () => {
         {!ready ? null : user ? (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <div>{formatAddress(address)}</div>
+              <Button variant="ghost">{formatAddress(address)}</Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
