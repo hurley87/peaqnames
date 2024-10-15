@@ -1,18 +1,74 @@
 'use client';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { getTokenURIFromName } from '@/lib/utils';
 import { useState } from 'react';
 import { toast } from 'sonner';
-import Image from 'next/image';
-import { usePrivy } from '@privy-io/react-auth';
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { createPublicClient, createWalletClient, custom, http } from 'viem';
+import { baseSepolia } from 'viem/chains';
+import { peaqnamesAbi, peaqnamesAddress } from '@/lib/peaqnames';
+import { useRouter } from 'next/navigation';
 
 export default function FindName() {
   const { user, login } = usePrivy();
   const [name, setName] = useState<string>('');
   const [showClaimForm, setShowClaimForm] = useState<boolean>(false);
+  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [isNameRegistered, setIsNameRegistered] = useState<boolean>(false);
   const [years, setYears] = useState<number>(1);
   const validName = name.length > 3;
+  const { wallets } = useWallets();
+  const wallet = wallets[0];
+  const address = wallet?.address as `0x${string}`;
+  const publicClient = createPublicClient({
+    chain: baseSepolia,
+    transport: http('https://sepolia.base.org'),
+  });
+  const router = useRouter();
+
+  const registerName = async () => {
+    setIsUploading(true);
+
+    try {
+      const tokenURI = await getTokenURIFromName(name);
+
+      console.log('tokenURI', tokenURI);
+
+      const ethereumProvider = (await wallet?.getEthereumProvider()) as any;
+
+      const walletClient = await createWalletClient({
+        account: address,
+        chain: baseSepolia,
+        transport: custom(ethereumProvider),
+      });
+
+      const { request }: any = await publicClient.simulateContract({
+        address: peaqnamesAddress,
+        abi: peaqnamesAbi,
+        functionName: 'earlyMint',
+        args: [name, years, tokenURI],
+        account: address,
+        value: BigInt(Math.floor(0.001 * years * 1e18)),
+      });
+
+      const hash = await walletClient.writeContract(request);
+
+      const receipt = await publicClient.waitForTransactionReceipt({
+        hash,
+      });
+
+      console.log('receipt', receipt);
+
+      toast.success('Name registered successfully');
+
+      router.push(`/profile/${address}`);
+    } catch (error) {
+      console.log('error', error);
+      toast.error('Not on the allow list');
+    } finally {
+      setIsUploading(false);
+    }
+  };
 
   if (showClaimForm) {
     return (
@@ -121,7 +177,13 @@ export default function FindName() {
                 </div>
                 <div className="w-full max-w-full md:max-w-[13rem]">
                   {user ? (
-                    <Button size="lg">Register Name</Button>
+                    <Button
+                      onClick={registerName}
+                      disabled={isUploading}
+                      size="lg"
+                    >
+                      {isUploading ? 'Registering...' : 'Register Name'}
+                    </Button>
                   ) : (
                     <Button onClick={login} size="lg">
                       Connect
@@ -135,6 +197,25 @@ export default function FindName() {
       </div>
     );
   }
+
+  const nameRegisteredCheck = async (name: string) => {
+    setName(name);
+    console.log('name', name);
+    const response = await publicClient.readContract({
+      address: peaqnamesAddress,
+      abi: peaqnamesAbi,
+      functionName: 'isNameRegistered',
+      args: [name],
+    });
+
+    const isRegistered = Boolean(response);
+
+    console.log('isRegistered', isRegistered);
+
+    setIsNameRegistered(isRegistered);
+
+    return response;
+  };
 
   return (
     <div className="absolute left-1/2 z-8 mx-auto w-full max-w-2xl -translate-x-1/2 transform transition-opacity  md:-translate-y-1/2 duration-700 top-[40vh] md:top-[50vh]">
@@ -152,7 +233,7 @@ export default function FindName() {
           <input
             type="text"
             value={name}
-            onChange={(e) => setName(e.target.value)}
+            onChange={(e) => nameRegisteredCheck(e.target.value)}
             className={`hover:border-[#6565FF] w-full outline-0 placeholder:uppercase peer py-5 md:py-7 pl-6 pr-16 text-md md:text-2xl bg-white border-gray-40/20 focus:border-[#6565FF]   ${
               validName ? 'rounded-t-3xl border-b-none' : 'rounded-3xl border-2'
             } transition-colors  border-gray-40/20 group-hover:border-[#6565FF]  shadow-lg`}
@@ -167,29 +248,38 @@ export default function FindName() {
             <div className="w-full px-6">
               <div className="w-full border-t border-gray-40/20"></div>
             </div>
-            <p className="w-full uppercase text-gray-60 font-bold pointer-events-none text-sm ml-6 mb-4 mt-4 hidden md:block">
-              AVAILABLE
-            </p>
-            <button
-              onClick={() => setShowClaimForm(true)}
-              className="flex w-full flex-row items-center justify-between transition-colors hover:bg-[#F9F9F9] active:bg-[#EAEAEB] text-ellipsis px-6 py-3 text"
-            >
-              <span className="truncate">{`${name}.peaq`}</span>
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                fill="none"
-                viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-5"
+            {!isNameRegistered && (
+              <p className="w-full uppercase text-gray-60 font-bold pointer-events-none text-sm ml-6 mb-4 mt-4 hidden md:block">
+                Available
+              </p>
+            )}
+            {isNameRegistered && (
+              <p className="w-full text-gray-60 pointer-events-none text-sm ml-6 mb-4 mt-4 hidden md:block text-red-500">
+                {name}.peaq is already registered
+              </p>
+            )}
+            {!isNameRegistered && (
+              <button
+                onClick={() => setShowClaimForm(true)}
+                className="flex w-full flex-row items-center justify-between transition-colors hover:bg-[#F9F9F9] active:bg-[#EAEAEB] text-ellipsis px-6 py-3 text"
               >
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  d="m8.25 4.5 7.5 7.5-7.5 7.5"
-                />
-              </svg>
-            </button>
+                <span className="truncate">{`${name}.peaq`}</span>
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  strokeWidth={1.5}
+                  stroke="currentColor"
+                  className="size-5"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    d="m8.25 4.5 7.5 7.5-7.5 7.5"
+                  />
+                </svg>
+              </button>
+            )}
           </div>
           <span className="absolute top-1/2 z-9 flex -translate-y-1/2 items-center scale-75 md:scale-100 right-8">
             <span>

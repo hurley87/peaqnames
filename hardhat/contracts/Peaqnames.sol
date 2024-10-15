@@ -32,6 +32,7 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
 
     constructor() ERC721("Peaqnames", "PEAQNAMES") Ownable(msg.sender) {
         earlyMintActive = true; // Set early minting to active from the start
+        nextTokenId = 1;
         _pause();
     }
 
@@ -111,16 +112,17 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
         return true;
     }
 
-    function isNameAvailable(string memory _name) public view returns (bool) {
+        // New function to check if a name is currently registered
+    function isNameRegistered(string memory _name) public view returns (bool) {
         uint256 tokenId = nameToTokenId[_name];
         
         // If the tokenId is 0, the name has never been registered
         if (tokenId == 0) {
-            return true;
+            return false;
         }
         
-        // If the tokenId exists, check if it has expired
-        return isNameAvailable(tokenId);
+        // Check if the name exists and has not expired
+        return _exists(tokenId) && !isNameAvailable(tokenId);
     }
 
     // Allow the contract owner to withdraw payments
@@ -218,6 +220,8 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
         return ownedNames;
     }
 
+
+
       // Override functions to resolve conflicts
   function _increaseBalance(
     address account,
@@ -255,4 +259,7 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
   function _exists(uint256 tokenId) internal view returns (bool) {
     return _ownerOf(tokenId) != address(0);
   }
+
+
+
 }
