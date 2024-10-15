@@ -42,7 +42,9 @@ export const Header = () => {
             </DropdownMenuContent>
           </DropdownMenu>
         ) : (
-          <Button onClick={login}>Connect</Button>
+          <Button variant="ghost" onClick={login}>
+            Connect
+          </Button>
         )}
       </nav>
     </div>
