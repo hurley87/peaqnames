@@ -24,6 +24,11 @@ export const Tokens = ({ address }: { address: `0x${string}` }) => {
       {tokenIds.map((tokenId) => (
         <Token key={tokenId} tokenId={tokenId} />
       ))}
+      {tokenIds.length === 0 && (
+        <div className="flex flex-col h-full w-full justify-center">
+          <p className="text-lg">No names found</p>
+        </div>
+      )}
     </div>
   );
 };
