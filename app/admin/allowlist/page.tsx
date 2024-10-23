@@ -7,7 +7,7 @@ export default function AllowlistPage() {
       <div>
         <h3 className="text-lg font-medium">Allowlist</h3>
         <p className="text-sm text-muted-foreground">
-          Add recipients to the allowlist.
+          Add recipients to the allowlist for early minting.
         </p>
       </div>
       <Separator />
