@@ -95,7 +95,7 @@ export function LimitForm() {
             <FormItem>
               <FormLabel>Limit</FormLabel>
               <FormControl>
-                <Input placeholder="Your limit" {...field} />
+                <Input placeholder="10" {...field} />
               </FormControl>
               <FormDescription>
                 The current limit is {mintLimit}.

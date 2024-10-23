@@ -96,7 +96,7 @@ export function FeeForm() {
             <FormItem>
               <FormLabel>Fee</FormLabel>
               <FormControl>
-                <Input placeholder="Your fee" {...field} />
+                <Input placeholder="0.001" {...field} />
               </FormControl>
               <FormDescription>
                 The current fee is {formatEther(BigInt(yearlyFee || '0'))} ETH.
