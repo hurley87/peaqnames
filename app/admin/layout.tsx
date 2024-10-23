@@ -13,10 +13,6 @@ const sidebarNavItems = [
     href: '/admin',
   },
   {
-    title: 'Mint Limit',
-    href: '/admin/limit',
-  },
-  {
     title: 'Reserve Name',
     href: '/admin/reserve',
   },
@@ -27,6 +23,10 @@ const sidebarNavItems = [
   {
     title: 'Allowlist',
     href: '/admin/allowlist',
+  },
+  {
+    title: 'Mint Limit',
+    href: '/admin/limit',
   },
 ];
 
