@@ -111,7 +111,7 @@ export function ReserveForm() {
                   {...field}
                 />
               </FormControl>
-              <FormDescription>Recipient's wallet address.</FormDescription>
+              <FormDescription>{`Recipient's wallet address.`}</FormDescription>
               <FormMessage />
             </FormItem>
           )}
