@@ -1,4 +1,4 @@
-export const peaqnamesAddress = '0xe552A19441118f86Cb7DBca6690A06a19781C918';
+export const peaqnamesAddress = '0x41871c06f63413896c14BABc4f4F0F0a3278110d';
 
 export const peaqnamesAbi = [
   {
@@ -248,13 +248,32 @@ export const peaqnamesAbi = [
     anonymous: false,
     inputs: [
       {
+        indexed: true,
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
+      },
+      {
         indexed: false,
-        internalType: 'bool',
-        name: 'status',
-        type: 'bool',
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
       },
     ],
-    name: 'EarlyMintActivated',
+    name: 'DefaultNameSet',
+    type: 'event',
+  },
+  {
+    anonymous: false,
+    inputs: [
+      {
+        indexed: false,
+        internalType: 'uint256',
+        name: 'newLimit',
+        type: 'uint256',
+      },
+    ],
+    name: 'EarlyMintLimitUpdated',
     type: 'event',
   },
   {
@@ -487,19 +506,43 @@ export const peaqnamesAbi = [
   {
     inputs: [
       {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'defaultNames',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
         internalType: 'string',
         name: '_name',
         type: 'string',
       },
       {
         internalType: 'uint256',
-        name: '_months',
+        name: '_years',
         type: 'uint256',
       },
       {
         internalType: 'string',
         name: '_uri',
         type: 'string',
+      },
+      {
+        internalType: 'bool',
+        name: 'setAsDefault',
+        type: 'bool',
       },
     ],
     name: 'earlyMint',
@@ -508,13 +551,19 @@ export const peaqnamesAbi = [
     type: 'function',
   },
   {
-    inputs: [],
-    name: 'earlyMintActive',
+    inputs: [
+      {
+        internalType: 'address',
+        name: '',
+        type: 'address',
+      },
+    ],
+    name: 'earlyMintCount',
     outputs: [
       {
-        internalType: 'bool',
+        internalType: 'uint256',
         name: '',
-        type: 'bool',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -522,7 +571,20 @@ export const peaqnamesAbi = [
   },
   {
     inputs: [],
-    name: 'flatFeePerMonth',
+    name: 'earlyMintLimit',
+    outputs: [
+      {
+        internalType: 'uint256',
+        name: '',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [],
+    name: 'flatFeePerYear',
     outputs: [
       {
         internalType: 'uint256',
@@ -555,17 +617,17 @@ export const peaqnamesAbi = [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: 'tokenId',
-        type: 'uint256',
+        internalType: 'address',
+        name: 'owner',
+        type: 'address',
       },
     ],
-    name: 'getExpiration',
+    name: 'getDefaultName',
     outputs: [
       {
-        internalType: 'uint256',
+        internalType: 'string',
         name: '',
-        type: 'uint256',
+        type: 'string',
       },
     ],
     stateMutability: 'view',
@@ -579,12 +641,41 @@ export const peaqnamesAbi = [
         type: 'address',
       },
     ],
-    name: 'getNamesByOwner',
+    name: 'getDefaultToken',
     outputs: [
       {
-        internalType: 'string[]',
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+      {
+        internalType: 'string',
+        name: 'name',
+        type: 'string',
+      },
+      {
+        internalType: 'uint256',
+        name: 'expiration',
+        type: 'uint256',
+      },
+    ],
+    stateMutability: 'view',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
+      },
+    ],
+    name: 'getExpiration',
+    outputs: [
+      {
+        internalType: 'uint256',
         name: '',
-        type: 'string[]',
+        type: 'uint256',
       },
     ],
     stateMutability: 'view',
@@ -661,13 +752,18 @@ export const peaqnamesAbi = [
       },
       {
         internalType: 'uint256',
-        name: '_months',
+        name: '_years',
         type: 'uint256',
       },
       {
         internalType: 'string',
         name: '_uri',
         type: 'string',
+      },
+      {
+        internalType: 'bool',
+        name: 'setAsDefault',
+        type: 'bool',
       },
     ],
     name: 'mintName',
@@ -805,7 +901,7 @@ export const peaqnamesAbi = [
       },
       {
         internalType: 'uint256',
-        name: '_months',
+        name: '_years',
         type: 'uint256',
       },
     ],
@@ -835,13 +931,18 @@ export const peaqnamesAbi = [
       },
       {
         internalType: 'uint256',
-        name: '_months',
+        name: '_years',
         type: 'uint256',
       },
       {
         internalType: 'string',
         name: '_uri',
         type: 'string',
+      },
+      {
+        internalType: 'bool',
+        name: 'setAsDefault',
+        type: 'bool',
       },
     ],
     name: 'reserveName',
@@ -940,12 +1041,25 @@ export const peaqnamesAbi = [
   {
     inputs: [
       {
-        internalType: 'bool',
-        name: '_status',
-        type: 'bool',
+        internalType: 'uint256',
+        name: 'tokenId',
+        type: 'uint256',
       },
     ],
-    name: 'setEarlyMintActive',
+    name: 'setDefaultName',
+    outputs: [],
+    stateMutability: 'nonpayable',
+    type: 'function',
+  },
+  {
+    inputs: [
+      {
+        internalType: 'uint256',
+        name: '_newLimit',
+        type: 'uint256',
+      },
+    ],
+    name: 'setEarlyMintLimit',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',
@@ -958,7 +1072,7 @@ export const peaqnamesAbi = [
         type: 'uint256',
       },
     ],
-    name: 'setFlatFeePerMonth',
+    name: 'setFlatFeePerYear',
     outputs: [],
     stateMutability: 'nonpayable',
     type: 'function',

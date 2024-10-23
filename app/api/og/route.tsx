@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
                 alt="Peaqnames"
                 tw="w-[70px] h-[70px] border-2 rounded-full"
               />
-              <p tw="text-white text-5xl truncate">{`${peaqName}.peaq`}</p>
+              <p tw="text-white text-4xl truncate">{`${peaqName}.peaq`}</p>
             </div>
           </div>
         </div>

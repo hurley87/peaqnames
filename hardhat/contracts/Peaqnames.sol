@@ -18,20 +18,23 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
     mapping(uint256 => Name) public names; // Maps tokenId to name details
     mapping(string => uint256) public nameToTokenId; // Maps name to tokenId
     uint256 public nextTokenId;
-    uint256 public flatFeePerMonth = 0.001 ether; // Fixed flat fee per month
+    uint256 public flatFeePerYear = 0.001 ether; // Fixed flat fee per year
     mapping(address => bool) public allowlist;
+    mapping(address => uint256) public defaultNames;
 
     // Events
     event NameMinted(address indexed renter, uint256 indexed tokenId, string name, uint256 expiration);
     event FeeUpdated(uint256 newFee);
     event AddedToAllowlist(address indexed user);
-    event EarlyMintActivated(bool status);
     event NameMintedByOwner(address indexed recipient, uint256 indexed tokenId, string name, uint256 expiration);
-        // Add this state variable near the top of the contract
-    bool public earlyMintActive;
+    event DefaultNameSet(address indexed owner, uint256 tokenId);
+    uint256 public earlyMintLimit = 3;
+    mapping(address => uint256) public earlyMintCount;
+
+    // Add this event near the top of the contract with other events
+    event EarlyMintLimitUpdated(uint256 newLimit);
 
     constructor() ERC721("Peaqnames", "PEAQNAMES") Ownable(msg.sender) {
-        earlyMintActive = true; // Set early minting to active from the start
         nextTokenId = 1;
         _pause();
     }
@@ -44,15 +47,14 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
     }
 
     // Function to mint a name for a custom period
-    function mintName(string memory _name, uint256 _months, string memory _uri) external payable whenNotPaused {
-        require(!earlyMintActive, "Public mint not active yet");
-        _mintName(_name, _months, _uri);
+    function mintName(string memory _name, uint256 _years, string memory _uri, bool setAsDefault) external payable whenNotPaused {
+        _mintName(_name, _years, _uri, setAsDefault);
     }
 
     // Internal function with the minting logic
-    function _mintName(string memory _name, uint256 _months, string memory _uri) internal {
-        require(_months >= 1, "Minimum ownership period is 1 month");
-        require(msg.value >= _months * flatFeePerMonth, "Insufficient payment");
+    function _mintName(string memory _name, uint256 _years, string memory _uri, bool setAsDefault) internal {
+        require(_years >= 1 && _years <= 10, "Registration period must be between 1 and 10 years");
+        require(msg.value >= _years * flatFeePerYear, "Insufficient payment");
         require(validateName(_name), "Invalid name format");
 
         uint256 tokenId = nameToTokenId[_name];
@@ -65,7 +67,7 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
 
         // Assign a new tokenId and expiration
         tokenId = nextTokenId++;
-        uint256 expiration = block.timestamp + (_months * 30 days);
+        uint256 expiration = block.timestamp + (_years * 365 days);
 
         names[tokenId] = Name({
             name: _name,
@@ -77,6 +79,12 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
         _mint(msg.sender, tokenId);
         _setTokenURI(tokenId, _uri);
 
+        // Set as default name if requested or if no default name is set
+        if (setAsDefault || defaultNames[msg.sender] == 0) {
+            defaultNames[msg.sender] = tokenId;
+            emit DefaultNameSet(msg.sender, tokenId);
+        }
+
         emit NameMinted(msg.sender, tokenId, _name, expiration);
     }
 
@@ -86,8 +94,8 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
     }
 
     // Allow the contract owner to update the flat fee per year
-    function setFlatFeePerMonth(uint256 _fee) external onlyOwner {
-        flatFeePerMonth = _fee;
+    function setFlatFeePerYear(uint256 _fee) external onlyOwner {
+        flatFeePerYear = _fee;
         emit FeeUpdated(_fee);
     }
 
@@ -148,24 +156,22 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
         }
     }
 
-    // New function to toggle early mint status
-    function setEarlyMintActive(bool _status) external onlyOwner {
-        earlyMintActive = _status;
-        emit EarlyMintActivated(_status);
-    }
-
     // New function for early minting
-    function earlyMint(string memory _name, uint256 _months, string memory _uri) external payable {
-        require(earlyMintActive, "Early mint is not active");
+    function earlyMint(string memory _name, uint256 _years, string memory _uri, bool setAsDefault) external payable whenNotPaused {
         require(allowlist[msg.sender], "Not on allowlist");
+        require(earlyMintCount[msg.sender] < earlyMintLimit, "Early mint limit reached");
+        
+        // Increment the early mint count for this user
+        earlyMintCount[msg.sender]++;
         
         // Use the existing mintName logic
-        _mintName(_name, _months, _uri);
+        _mintName(_name, _years, _uri, setAsDefault);
     }
 
     // let owner reserve a name for free 
-    function reserveName(address _recipient, string memory _name, uint256 _months, string memory _uri) external onlyOwner {
+    function reserveName(address _recipient, string memory _name, uint256 _years, string memory _uri, bool setAsDefault) external onlyOwner {
         require(_recipient != address(0), "Invalid recipient address");
+        require(_years >= 1 && _years <= 10, "Registration period must be between 1 and 10 years");
         
         uint256 tokenId = nameToTokenId[_name];
 
@@ -177,7 +183,7 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
 
         // Assign a new tokenId and expiration
         tokenId = nextTokenId++;
-        uint256 expiration = block.timestamp + (_months * 30 days);
+        uint256 expiration = block.timestamp + (_years * 365 days);
 
         names[tokenId] = Name({
             name: _name,
@@ -189,37 +195,26 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
         _mint(_recipient, tokenId);
         _setTokenURI(tokenId, _uri);
 
+        // Set as default name if requested or if no default name is set
+        if (setAsDefault || defaultNames[_recipient] == 0) {
+            defaultNames[_recipient] = tokenId;
+            emit DefaultNameSet(_recipient, tokenId);
+        }
+
         emit NameMintedByOwner(_recipient, tokenId, _name, expiration);
     }
 
     // Function to renew a name
-    function renewName(uint256 tokenId, uint256 _months) external payable whenNotPaused {
+    function renewName(uint256 tokenId, uint256 _years) external payable whenNotPaused {
         require(ownerOf(tokenId) == msg.sender, "You are not the owner");
-        require(_months > 0, "Renewal period must be greater than 0");
-        require(msg.value >= _months * flatFeePerMonth, "Insufficient payment");
+        require(_years >= 1 && _years <= 10, "Renewal period must be between 1 and 10 years");
+        require(msg.value >= _years * flatFeePerYear, "Insufficient payment");
 
-        uint256 newExpiration = names[tokenId].expiration + (_months * 30 days);
+        uint256 newExpiration = names[tokenId].expiration + (_years * 365 days);
         names[tokenId].expiration = newExpiration;
 
         emit NameMinted(msg.sender, tokenId, names[tokenId].name, newExpiration);
     }
-
-    // Function to get all names owned by an address
-    function getNamesByOwner(address owner) external view returns (string[] memory) {
-        uint256 balance = balanceOf(owner);
-        string[] memory ownedNames = new string[](balance);
-        
-        uint256 index = 0;
-        for (uint256 i = 0; i < nextTokenId; i++) {
-            if (ownerOf(i) == owner) {
-                ownedNames[index] = names[i].name;
-                index++;
-            }
-        }
-        
-        return ownedNames;
-    }
-
 
 
       // Override functions to resolve conflicts
@@ -260,6 +255,30 @@ contract Peaqnames is ERC721Enumerable, ERC721URIStorage, Ownable, Pausable {
     return _ownerOf(tokenId) != address(0);
   }
 
+  function setDefaultName(uint256 tokenId) external {
+    require(ownerOf(tokenId) == msg.sender, "You don't own this name");
+    defaultNames[msg.sender] = tokenId;
+    emit DefaultNameSet(msg.sender, tokenId);
+  }
 
+  function getDefaultName(address owner) external view returns (string memory) {
+    uint256 tokenId = defaultNames[owner];
+    require(tokenId != 0, "No default name set");
+    return names[tokenId].name;
+  }
+
+  function getDefaultToken(address owner) external view returns (uint256 tokenId, string memory name, uint256 expiration) {
+    tokenId = defaultNames[owner];
+    require(tokenId != 0, "No default name set");
+    Name memory nameInfo = names[tokenId];
+    return (tokenId, nameInfo.name, nameInfo.expiration);
+  }
+
+    // Add this function near other owner-only functions
+    function setEarlyMintLimit(uint256 _newLimit) external onlyOwner {
+        require(_newLimit > 0, "Limit must be greater than zero");
+        earlyMintLimit = _newLimit;
+        emit EarlyMintLimitUpdated(_newLimit);
+    }
 
 }

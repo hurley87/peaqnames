@@ -4,6 +4,7 @@ import './globals.css';
 import { Toaster } from '@/components/ui/sonner';
 import Providers from '@/components/providers';
 import { Header } from '@/components/header';
+import { NameProvider } from '@/lib/NameContext';
 
 const geistSans = localFont({
   src: './fonts/GeistVF.woff',
@@ -32,9 +33,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased flex min-h-screen flex-col`}
       >
         <Providers>
-          <Header />
-          <main>{children}</main>
-          <Toaster />
+          <NameProvider>
+            <Header />
+            <main>{children}</main>
+            <Toaster />
+          </NameProvider>
         </Providers>
       </body>
     </html>

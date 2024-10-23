@@ -9,15 +9,21 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { useNameContext } from '../lib/NameContext';
+import { useEffect } from 'react';
+import { useDefaultName } from '../hooks/useDefaultName';
 
 export const Header = () => {
   const { user, login, ready, logout } = usePrivy();
   const address = user?.wallet?.address as `0x${string}`;
+  const { defaultName, setDefaultName } = useNameContext();
+  const fetchedDefaultName = useDefaultName(address);
 
-  const formatAddress = (address: string) => {
-    if (!address) return '';
-    return `${address?.slice(0, 6)}...${address?.slice(-4)}`;
-  };
+  useEffect(() => {
+    if (fetchedDefaultName) {
+      setDefaultName(fetchedDefaultName);
+    }
+  }, [fetchedDefaultName, setDefaultName]);
 
   return (
     <div className="absolute top-0 z-20 flex w-full flex-col">
@@ -28,7 +34,9 @@ export const Header = () => {
         {!ready ? null : user ? (
           <DropdownMenu>
             <DropdownMenuTrigger>
-              <Button variant="ghost">{formatAddress(address)}</Button>
+              <Button variant="ghost">
+                {defaultName ? defaultName : 'Loading...'}
+              </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end">
               <DropdownMenuItem asChild>
