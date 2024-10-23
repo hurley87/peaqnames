@@ -5,9 +5,9 @@ export default function EarlyPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h3 className="text-lg font-medium">Early Mint Access</h3>
+        <h3 className="text-lg font-medium">Mint Access</h3>
         <p className="text-sm text-muted-foreground">
-          Update access to early minting.
+          Pause or unpause minting.
         </p>
       </div>
       <Separator />
