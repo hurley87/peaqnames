@@ -34,7 +34,7 @@ type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 // This can come from your database or API.
 const defaultValues: Partial<AccountFormValues> = {
-  fee: '0.001',
+  fee: '',
 };
 
 export function FeeForm() {

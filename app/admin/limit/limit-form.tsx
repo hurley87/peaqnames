@@ -33,7 +33,7 @@ const accountFormSchema = z.object({
 type AccountFormValues = z.infer<typeof accountFormSchema>;
 
 const defaultValues: Partial<AccountFormValues> = {
-  limit: '10',
+  limit: '',
 };
 
 export function LimitForm() {
