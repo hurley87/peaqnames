@@ -1,4 +1,4 @@
-export const peaqnamesAddress = '0x41871c06f63413896c14BABc4f4F0F0a3278110d';
+export const peaqnamesAddress = '0xF78cA7d764EBAa273FfC5d4F2FA450786d237823';
 
 export const peaqnamesAbi = [
   {
