@@ -28,6 +28,10 @@ const sidebarNavItems = [
     title: 'Mint Limit',
     href: '/admin/limit',
   },
+  {
+    title: 'Withdraw',
+    href: '/admin/withdraw',
+  },
 ];
 
 interface SettingsLayoutProps {
