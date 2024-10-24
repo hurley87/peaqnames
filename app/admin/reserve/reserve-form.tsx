@@ -123,7 +123,7 @@ export function ReserveForm() {
             <FormItem>
               <FormLabel>Name</FormLabel>
               <FormControl>
-                <Input placeholder="Name" {...field} />
+                <Input placeholder="" {...field} />
               </FormControl>
               <FormDescription>
                 Name reserved for the recipient.

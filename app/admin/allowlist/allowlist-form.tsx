@@ -99,7 +99,7 @@ export function AllowlistForm() {
                 />
               </FormControl>
               <FormDescription>
-                Recipients wallet addresses separated by commas.
+                Separate wallet addresses by commas.
               </FormDescription>
               <FormMessage />
             </FormItem>
