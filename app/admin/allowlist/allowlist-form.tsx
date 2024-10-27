@@ -48,7 +48,6 @@ export function AllowlistForm() {
     setIsUpdating(true);
     try {
       const recipients = data.recipients;
-      console.log('recipients', recipients);
 
       const ethereumProvider = (await wallet?.getEthereumProvider()) as any;
 

@@ -9,7 +9,6 @@ import { Button } from '@/components/ui/button';
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
@@ -86,8 +85,6 @@ export function UpdateProfile({
   const [isUpdating, setIsUpdating] = useState(false);
   const { skillsCount } = useGetSkillsCount();
 
-  console.log('skillsCount', skillsCount);
-
   async function onSubmit(data: AccountFormValues) {
     setIsUpdating(true);
     try {
@@ -102,8 +99,6 @@ export function UpdateProfile({
         chain: baseSepolia,
         transport: custom(ethereumProvider),
       });
-
-      console.log('selectedSkills', selectedSkills);
 
       const { request }: any = await publicClient.simulateContract({
         address: peaqprofilesAddress,
@@ -132,14 +127,6 @@ export function UpdateProfile({
   }
 
   const [isOpen, setIsOpen] = useState(false);
-
-  console.log('skills', skills);
-
-  const currentSkills = skills
-    .split(',')
-    .map((skill) => parseInt(skill))
-    .filter((skill) => !isNaN(skill));
-  console.log('currentSkills', currentSkills);
 
   const toggleSkill = (skill: number) => {
     setSelectedSkills((prevSkills) =>
