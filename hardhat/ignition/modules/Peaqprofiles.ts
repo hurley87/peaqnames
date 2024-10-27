@@ -1,9 +1,9 @@
-// import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
+import { buildModule } from '@nomicfoundation/hardhat-ignition/modules';
 
-// const PeaqprofilesModule = buildModule('PeaqprofilesModule', (m) => {
-//   const peaqprofiles = m.contract('Peaqprofiles', []);
+const PeaqprofilesModule = buildModule('PeaqprofilesModule', (m) => {
+  const peaqprofiles = m.contract('Peaqprofiles', []);
 
-//   return { peaqprofiles };
-// });
+  return { peaqprofiles };
+});
 
-// export default PeaqprofilesModule;
+export default PeaqprofilesModule;

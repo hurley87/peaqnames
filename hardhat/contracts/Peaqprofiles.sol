@@ -9,6 +9,7 @@ contract Peaqprofiles is Ownable {
         string twitter;
         string website;
         uint256[] skills;
+        string description;  // New field
     }
 
     mapping(address => Profile) private profiles;
@@ -19,8 +20,8 @@ contract Peaqprofiles is Ownable {
     mapping(uint256 => string) public skillNames;
     uint256 private nextSkillId;  // Tracks the next available skill ID
 
-    event ProfileCreated(address indexed user, string twitter, string website, uint256[] skills);
-    event ProfileUpdated(address indexed user, string twitter, string website, uint256[] skills);
+    event ProfileCreated(address indexed user, string twitter, string website, uint256[] skills, string description);
+    event ProfileUpdated(address indexed user, string twitter, string website, uint256[] skills, string description);
     event SkillAdded(uint256 skillId, string skillName);
     event ProfileDeleted(address indexed user);
     event TwitterUpdated(address indexed user, string newTwitter);
@@ -28,6 +29,7 @@ contract Peaqprofiles is Ownable {
     event SkillsUpdated(address indexed user, uint256[] newSkills);
     event SkillRemoved(uint256 skillId);
     event SkillUpdated(uint256 skillId, string newName);
+    event DescriptionUpdated(address indexed user, string newDescription);
 
     // Modifier to ensure only the profile owner can update their profile
     modifier onlyProfileOwner(address _address) {
@@ -41,7 +43,7 @@ contract Peaqprofiles is Ownable {
     }
 
     // Creates a new profile for the caller. Only one profile per address is allowed.
-    function createProfile(string memory _twitter, string memory _website, uint256[] memory _skills) external {
+    function createProfile(string memory _twitter, string memory _website, uint256[] memory _skills, string memory _description) external {
         require(!hasProfile[msg.sender], "Profile already exists.");
         require(!hasDuplicateSkills(_skills), "Duplicate skills are not allowed.");
         
@@ -50,14 +52,14 @@ contract Peaqprofiles is Ownable {
             require(skillExists(_skills[i]), "One or more skills do not exist.");
         }
 
-        profiles[msg.sender] = Profile(_twitter, _website, _skills);
+        profiles[msg.sender] = Profile(_twitter, _website, _skills, _description);
         hasProfile[msg.sender] = true;
         totalProfiles++;
-        emit ProfileCreated(msg.sender, _twitter, _website, _skills);
+        emit ProfileCreated(msg.sender, _twitter, _website, _skills, _description);
     }
 
     // Updates an existing profile. Only the profile owner can update it.
-    function updateProfile(string memory _twitter, string memory _website, uint256[] memory _skills) external onlyProfileOwner(msg.sender) {
+    function updateProfile(string memory _twitter, string memory _website, uint256[] memory _skills, string memory _description) external onlyProfileOwner(msg.sender) {
         require(hasProfile[msg.sender], "Profile does not exist.");
         require(!hasDuplicateSkills(_skills), "Duplicate skills are not allowed.");
         
@@ -66,15 +68,15 @@ contract Peaqprofiles is Ownable {
             require(skillExists(_skills[i]), "One or more skills do not exist.");
         }
         
-        profiles[msg.sender] = Profile(_twitter, _website, _skills);
-        emit ProfileUpdated(msg.sender, _twitter, _website, _skills);
+        profiles[msg.sender] = Profile(_twitter, _website, _skills, _description);
+        emit ProfileUpdated(msg.sender, _twitter, _website, _skills, _description);
     }
 
-    // Retrieves a profile by address. Returns Twitter, Website, and Skills (as integers).
-    function viewProfile(address _user) external view returns (string memory, string memory, uint256[] memory) {
+    // Retrieves a profile by address. Returns Twitter, Website, Skills (as integers), and Description.
+    function viewProfile(address _user) external view returns (string memory, string memory, uint256[] memory, string memory) {
         require(hasProfile[_user], "Profile does not exist.");
         Profile memory userProfile = profiles[_user];
-        return (userProfile.twitter, userProfile.website, userProfile.skills);
+        return (userProfile.twitter, userProfile.website, userProfile.skills, userProfile.description);
     }
 
     // Adds a new skill to the skill list. Only the contract owner can call this.
@@ -171,5 +173,12 @@ contract Peaqprofiles is Ownable {
             }
         }
         return false;
+    }
+
+    // New function to update only the description
+    function updateDescription(string memory _description) external onlyProfileOwner(msg.sender) {
+        require(hasProfile[msg.sender], "Profile does not exist.");
+        profiles[msg.sender].description = _description;
+        emit DescriptionUpdated(msg.sender, _description);
     }
 }

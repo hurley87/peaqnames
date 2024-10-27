@@ -1,6 +1,7 @@
 import Container from '@/components/container';
 import { DefaultName } from '@/components/default-name';
 import { isAddress } from 'viem';
+import { ManageProfile } from './manage-profile';
 
 interface UpdatePageProps {
   params: { address: string };
@@ -15,8 +16,9 @@ export default async function UpdatePage({ params }: UpdatePageProps) {
 
   return (
     <Container>
-      <div className="w-full max-w-lg mx-auto">
+      <div className="w-full max-w-lg mx-auto flex flex-col gap-4">
         <DefaultName profileAddress={address} />
+        <ManageProfile profileAddress={address} />
       </div>
     </Container>
   );
