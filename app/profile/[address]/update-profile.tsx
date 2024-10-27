@@ -67,7 +67,12 @@ export function UpdateProfile({
 
   useEffect(() => {
     // Initialize selected skills from props
-    setSelectedSkills(skills.split(',').map((skill) => parseInt(skill)));
+    setSelectedSkills(
+      skills
+        .split(',')
+        .map((skill) => parseInt(skill))
+        .filter((skill) => !isNaN(skill))
+    );
   }, [skills]);
 
   const form = useForm<AccountFormValues>({
@@ -97,6 +102,8 @@ export function UpdateProfile({
         chain: baseSepolia,
         transport: custom(ethereumProvider),
       });
+
+      console.log('selectedSkills', selectedSkills);
 
       const { request }: any = await publicClient.simulateContract({
         address: peaqprofilesAddress,
@@ -128,8 +135,10 @@ export function UpdateProfile({
 
   console.log('skills', skills);
 
-  const currentSkills = skills.split(',').map((skill) => parseInt(skill));
-
+  const currentSkills = skills
+    .split(',')
+    .map((skill) => parseInt(skill))
+    .filter((skill) => !isNaN(skill));
   console.log('currentSkills', currentSkills);
 
   const toggleSkill = (skill: number) => {
